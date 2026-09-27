@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form 연습 - form1.html</title>
+</head>
+<body>
+    <!--
+        STEP 2 + STEP 3
+        - STEP 2: Form 태그와 입력 요소 연습 (입력 항목 10개 이상)
+        - STEP 3: Clone Coding (디자인보다 구조 중심)
+          원본 URL: https://getbootstrap.com/docs/5.2/examples/checkout/
+          (Bootstrap Checkout 예제의 "Billing address / Payment" 구조를 따라 만들었다)
+        이 파일에는 CSS를 전혀 넣지 않는다. → 브라우저 기본 모양 그대로 보인다.
+    -->
+
+    <h1>Checkout form</h1>
+    <p>
+        Clone Coding 원본:
+        <a href="https://getbootstrap.com/docs/5.2/examples/checkout/" target="_blank">
+            https://getbootstrap.com/docs/5.2/examples/checkout/
+        </a>
+    </p>
+    <p><a href="index.html">← 목록으로</a></p>
+
+    <!--
+        <form> 주요 속성
+        - action : 데이터를 보낼 주소 (서버가 없으므로 "#")
+        - method : 보내는 방식 (get = 주소창에 붙어서 전송, post = 본문에 담아 전송)
+        - id     : JavaScript에서 찾을 때 사용
+    -->
+    <form id="userForm" action="#" method="get">
+
+        <!-- ========== 1. 기본 정보 (Billing address) ========== -->
+        <!-- fieldset: 관련 입력들을 하나로 묶는 상자 / legend: 그 상자의 제목 -->
+        <fieldset>
+            <legend>Billing address (청구지 정보)</legend>
+
+            <!-- label의 for 값 = input의 id 값 → label을 클릭해도 input에 커서가 들어간다 -->
+            <!-- 1) text -->
+            <label for="firstName">First name</label>
+            <input type="text" id="firstName" name="firstName" placeholder="길동">
+            <br>
+
+            <!-- 2) text -->
+            <label for="lastName">Last name</label>
+            <input type="text" id="lastName" name="lastName" placeholder="홍">
+            <br>
+
+            <!-- 3) text (Username) -->
+            <label for="username">Username</label>
+            @<input type="text" id="username" name="username" placeholder="Username">
+            <br>
+
+            <!-- 4) email : 형식이 맞는지 브라우저가 알아서 검사할 수 있다 -->
+            <label for="email">Email <small>(Optional)</small></label>
+            <input type="email" id="email" name="email" placeholder="you@example.com">
+            <br>
+
+            <!-- 5) password -->
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password" placeholder="6자 이상">
+            <br>
+
+            <!-- 6) text (주소) -->
+            <label for="address">Address</label>
+            <input type="text" id="address" name="address" placeholder="1234 Main St">
+            <br>
+
+            <!-- 7) text (상세 주소) -->
+            <label for="address2">Address 2 <small>(Optional)</small></label>
+            <input type="text" id="address2" name="address2" placeholder="Apartment or suite">
+            <br>
+
+            <!-- 8) select + optgroup : 옵션을 그룹(대륙별)으로 묶기 -->
+            <label for="country">Country</label>
+            <select id="country" name="country">
+                <option value="">Choose...</option>
+                <optgroup label="Asia">
+                    <option value="KR">대한민국</option>
+                    <option value="JP">일본</option>
+                    <option value="CN">중국</option>
+                </optgroup>
+                <optgroup label="America">
+                    <option value="US">United States</option>
+                    <option value="CA">Canada</option>
+                </optgroup>
+                <optgroup label="Europe">
+                    <option value="UK">United Kingdom</option>
+                    <option value="DE">Germany</option>
+                </optgroup>
+            </select>
+            <br>
+
+            <!-- 9) text + datalist : 입력하면 추천 목록이 뜬다 (목록 밖의 값도 입력 가능) -->
+            <!-- input의 list 값 = datalist의 id 값 으로 연결 -->
+            <label for="city">City</label>
+            <input type="text" id="city" name="city" list="cityList" placeholder="도시를 입력하세요">
+            <datalist id="cityList">
+                <option value="서울">
+                <option value="부산">
+                <option value="대구">
+                <option value="포항">
+                <option value="인천">
+            </datalist>
+            <br>
+
+            <!-- 10) text (우편번호) -->
+            <label for="zip">Zip</label>
+            <input type="text" id="zip" name="zip" placeholder="37554">
+        </fieldset>
+
+        <!-- ========== 2. 추가 정보 ========== -->
+        <fieldset>
+            <legend>Additional info (추가 정보)</legend>
+
+            <!-- 11) date : 달력에서 날짜 선택 -->
+            <label for="deliveryDate">희망 배송일</label>
+            <input type="date" id="deliveryDate" name="deliveryDate">
+            <br>
+
+            <!-- 12) color : 색상 선택 창 -->
+            <label for="favColor">포장지 색상</label>
+            <input type="color" id="favColor" name="favColor" value="#0d6efd">
+            <br>
+
+            <!-- 13) textarea : 여러 줄 입력. rows=줄 수, cols=글자 폭 -->
+            <label for="memo">배송 메모</label><br>
+            <textarea id="memo" name="memo" rows="4" cols="40"
+                placeholder="배송 시 요청사항을 입력하세요"></textarea>
+        </fieldset>
+
+        <!-- ========== 3. 체크박스 (Checkout 예제 구조) ========== -->
+        <fieldset>
+            <legend>Options (옵션)</legend>
+
+            <!-- 14) checkbox : 여러 개를 동시에 선택할 수 있다 -->
+            <input type="checkbox" id="sameAddress" name="sameAddress">
+            <label for="sameAddress">Shipping address is the same as my billing address</label>
+            <br>
+
+            <input type="checkbox" id="saveInfo" name="saveInfo">
+            <label for="saveInfo">Save this information for next time</label>
+        </fieldset>
+
+        <!-- ========== 4. 결제 (Payment) ========== -->
+        <fieldset>
+            <legend>Payment (결제 수단)</legend>
+
+            <!-- 15) radio : 같은 name끼리 하나만 선택된다. checked = 기본 선택 -->
+            <input type="radio" id="credit" name="paymentMethod" value="credit" checked>
+            <label for="credit">Credit card</label>
+
+            <input type="radio" id="debit" name="paymentMethod" value="debit">
+            <label for="debit">Debit card</label>
+
+            <input type="radio" id="paypal" name="paymentMethod" value="paypal">
+            <label for="paypal">PayPal</label>
+            <br>
+
+            <!-- 16~19) 카드 정보 -->
+            <label for="ccName">Name on card</label>
+            <input type="text" id="ccName" name="ccName">
+            <small>Full name as displayed on card</small>
+            <br>
+
+            <label for="ccNumber">Credit card number</label>
+            <input type="text" id="ccNumber" name="ccNumber" placeholder="1234-5678-1234-5678">
+            <br>
+
+            <label for="ccExpiration">Expiration</label>
+            <input type="month" id="ccExpiration" name="ccExpiration">
+            <br>
+
+            <label for="ccCvv">CVV</label>
+            <input type="text" id="ccCvv" name="ccCvv" size="4">
+        </fieldset>
+
+        <!-- 20) 동의 체크박스 -->
+        <p>
+            <input type="checkbox" id="agree" name="agree">
+            <label for="agree">이용 약관에 동의합니다.</label>
+        </p>
+
+        <!-- button type="submit" : 폼 제출 / type="reset" : 입력값 초기화 -->
+        <button type="submit">Continue to checkout</button>
+        <button type="reset">다시 입력</button>
+    </form>
+</body>
+</html>

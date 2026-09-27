@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Form + Validation + JS - form1_js.html</title>
+
+    <!--
+        STEP 5. form1_css.html을 복사한 뒤
+        (1) HTML Validation 속성(required, type="email", minlength, pattern)을 추가하고
+        (2) JavaScript로 submit 이벤트를 처리한 파일
+    -->
+    <style>
+        /* ===== 여기부터는 form1_css.html과 동일한 CSS ===== */
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 24px 16px;
+            background-color: #f1f3f5;
+            color: #212529;
+            font-family: "Pretendard", "Malgun Gothic", sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        .source {
+            text-align: center;
+            color: #6c757d;
+            font-size: 14px;
+        }
+
+        a {
+            color: #0d6efd;
+        }
+
+        form {
+            width: 100%;
+            max-width: 640px;
+            margin: 24px auto;
+            padding: 32px;
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        fieldset {
+            margin: 0 0 24px 0;
+            padding: 16px 20px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
+        }
+
+        legend {
+            padding: 0 8px;
+            font-weight: bold;
+            color: #0d6efd;
+        }
+
+        .field {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .inline label {
+            display: inline-block;
+            margin-right: 12px;
+            font-weight: normal;
+        }
+
+        small {
+            color: #6c757d;
+            font-weight: normal;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="date"],
+        input[type="month"],
+        select,
+        textarea {
+            display: block;
+            width: 100%;
+            padding: 10px 12px;
+            margin: 0;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            background-color: #ffffff;
+            color: #212529;
+            font-size: 15px;
+            font-family: inherit;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        textarea {
+            resize: vertical;
+        }
+
+        input:hover,
+        select:hover,
+        textarea:hover {
+            border-color: #86b7fe;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #0d6efd;
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+            background-color: #f8fbff;
+        }
+
+        ::placeholder {
+            color: #adb5bd;
+        }
+
+        .input-group {
+            display: flex;
+        }
+
+        .input-group span {
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-right: none;
+            border-radius: 6px 0 0 6px;
+            background-color: #e9ecef;
+        }
+
+        .input-group input {
+            border-radius: 0 6px 6px 0;
+        }
+
+        input[type="color"] {
+            width: 60px;
+            height: 40px;
+            padding: 2px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        input[type="checkbox"],
+        input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            margin-right: 4px;
+            vertical-align: middle;
+            accent-color: #0d6efd;
+            cursor: pointer;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        button {
+            display: inline-block;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button[type="submit"] {
+            flex: 1;
+            background-color: #0d6efd;
+            color: #ffffff;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0b5ed7;
+        }
+
+        button[type="reset"] {
+            background-color: #e9ecef;
+            color: #495057;
+        }
+
+        button[type="reset"]:hover {
+            background-color: #dee2e6;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        /* ===== 여기부터 form1_js.html에서 새로 추가한 CSS ===== */
+
+        /* 필수 항목 label 뒤에 빨간 * 표시 */
+        .required-mark {
+            color: #dc3545;
+        }
+
+        /* 에러 안내 문구: 평소에는 숨겨 둔다 */
+        .error-text {
+            display: none;
+            margin-top: 4px;
+            color: #dc3545;
+            font-size: 13px;
+        }
+
+        /*
+            :invalid / :valid 는 "지금 값이 규칙에 맞는지"를 CSS가 알려주는 선택자.
+            그런데 그냥 쓰면 페이지를 열자마자(아직 아무것도 안 썼는데) 빨간색이 된다.
+            그래서 제출 버튼을 한 번 누른 뒤에만 form에 was-validated 클래스를 붙이고,
+            그때부터 색을 보여준다. (Bootstrap Checkout 예제와 같은 방식)
+        */
+        .was-validated input:invalid,
+        .was-validated select:invalid,
+        .was-validated textarea:invalid {
+            border-color: #dc3545;
+            background-color: #fff5f5;
+        }
+
+        .was-validated input:valid,
+        .was-validated select:valid,
+        .was-validated textarea:valid {
+            border-color: #198754;
+        }
+
+        /* 틀린 input 바로 뒤에 있는 .error-text만 보이게 (~ : 뒤에 오는 형제 선택자) */
+        .was-validated input:invalid ~ .error-text,
+        .was-validated select:invalid ~ .error-text {
+            display: block;
+        }
+
+        /* input-group(@Username) 안의 input은 .error-text와 형제가 아니므로 따로 처리 */
+        .was-validated .input-group:has(input:invalid) ~ .error-text {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Checkout form</h1>
+    <p class="source">
+        Clone Coding 원본:
+        <a href="https://getbootstrap.com/docs/5.2/examples/checkout/" target="_blank">
+            https://getbootstrap.com/docs/5.2/examples/checkout/
+        </a>
+        <br>
+        <a href="index.html">← 목록으로</a>
+    </p>
+
+    <!--
+        novalidate : 브라우저가 스스로 띄우는 검사 말풍선을 끄고,
+                     검사를 JavaScript(checkValidity)에게 맡긴다.
+        ※ novalidate가 없으면, 값이 틀렸을 때 브라우저가 submit 이벤트 자체를
+          발생시키지 않기 때문에 아래 JavaScript 코드가 실행되지 않는다.
+        ※ HTML Validation만 따로 확인하고 싶으면 novalidate를 잠깐 지우고 테스트해 보자.
+    -->
+    <form id="userForm" action="#" method="get" novalidate>
+
+        <!-- ========== 1. 기본 정보 ========== -->
+        <fieldset>
+            <legend>Billing address (청구지 정보)</legend>
+
+            <!-- required : 비어 있으면 안 됨 -->
+            <div class="field">
+                <label for="firstName">First name <span class="required-mark">*</span></label>
+                <input type="text" id="firstName" name="firstName" placeholder="길동" required>
+                <div class="error-text">이름을 입력하세요.</div>
+            </div>
+
+            <div class="field">
+                <label for="lastName">Last name <span class="required-mark">*</span></label>
+                <input type="text" id="lastName" name="lastName" placeholder="홍" required>
+                <div class="error-text">성을 입력하세요.</div>
+            </div>
+
+            <!-- minlength="3" : 3글자 이상이어야 함 -->
+            <div class="field">
+                <label for="username">Username <span class="required-mark">*</span></label>
+                <div class="input-group">
+                    <span>@</span>
+                    <input type="text" id="username" name="username" placeholder="3자 이상"
+                        minlength="3" required>
+                </div>
+                <div class="error-text">Username은 3자 이상 입력하세요.</div>
+            </div>
+
+            <!-- type="email" : @가 들어간 이메일 형식이어야 함 -->
+            <div class="field">
+                <label for="email">Email <span class="required-mark">*</span></label>
+                <input type="email" id="email" name="email" placeholder="you@example.com" required>
+                <div class="error-text">올바른 이메일 주소를 입력하세요. (예: you@example.com)</div>
+            </div>
+
+            <!-- minlength="6" : 6글자 이상 -->
+            <div class="field">
+                <label for="password">Password <span class="required-mark">*</span></label>
+                <input type="password" id="password" name="password" placeholder="6자 이상"
+                    minlength="6" required>
+                <div class="error-text">비밀번호는 6자 이상 입력하세요.</div>
+            </div>
+
+            <div class="field">
+                <label for="address">Address <span class="required-mark">*</span></label>
+                <input type="text" id="address" name="address" placeholder="1234 Main St" required>
+                <div class="error-text">주소를 입력하세요.</div>
+            </div>
+
+            <div class="field">
+                <label for="address2">Address 2 <small>(Optional)</small></label>
+                <input type="text" id="address2" name="address2" placeholder="Apartment or suite">
+            </div>
+
+            <!-- select에 required를 주면 value=""인 첫 옵션(Choose...)은 선택 안 한 것으로 본다 -->
+            <div class="field">
+                <label for="country">Country <span class="required-mark">*</span></label>
+                <select id="country" name="country" required>
+                    <option value="">Choose...</option>
+                    <optgroup label="Asia">
+                        <option value="KR">대한민국</option>
+                        <option value="JP">일본</option>
+                        <option value="CN">중국</option>
+                    </optgroup>
+                    <optgroup label="America">
+                        <option value="US">United States</option>
+                        <option value="CA">Canada</option>
+                    </optgroup>
+                    <optgroup label="Europe">
+                        <option value="UK">United Kingdom</option>
+                        <option value="DE">Germany</option>
+                    </optgroup>
+                </select>
+                <div class="error-text">국가를 선택하세요.</div>
+            </div>
+
+            <div class="field">
+                <label for="city">City</label>
+                <input type="text" id="city" name="city" list="cityList" placeholder="도시를 입력하세요">
+                <datalist id="cityList">
+                    <option value="서울">
+                    <option value="부산">
+                    <option value="대구">
+                    <option value="포항">
+                    <option value="인천">
+                </datalist>
+            </div>
+
+            <!-- pattern : 정규표현식. [0-9]{5} = 숫자 5개 -->
+            <div class="field">
+                <label for="zip">Zip</label>
+                <input type="text" id="zip" name="zip" placeholder="37554" pattern="[0-9]{5}">
+                <div class="error-text">우편번호는 숫자 5자리입니다.</div>
+            </div>
+        </fieldset>
+
+        <!-- ========== 2. 추가 정보 ========== -->
+        <fieldset>
+            <legend>Additional info (추가 정보)</legend>
+
+            <div class="field">
+                <label for="deliveryDate">희망 배송일 <span class="required-mark">*</span></label>
+                <input type="date" id="deliveryDate" name="deliveryDate" required>
+                <div class="error-text">희망 배송일을 선택하세요.</div>
+            </div>
+
+            <div class="field">
+                <label for="favColor">포장지 색상</label>
+                <input type="color" id="favColor" name="favColor" value="#0d6efd">
+            </div>
+
+            <!-- maxlength : 최대 글자 수 제한 -->
+            <div class="field">
+                <label for="memo">배송 메모 <small>(최대 100자)</small></label>
+                <textarea id="memo" name="memo" rows="4" maxlength="100"
+                    placeholder="배송 시 요청사항을 입력하세요"></textarea>
+            </div>
+        </fieldset>
+
+        <!-- ========== 3. 옵션 ========== -->
+        <fieldset>
+            <legend>Options (옵션)</legend>
+
+            <div class="field inline">
+                <input type="checkbox" id="sameAddress" name="sameAddress">
+                <label for="sameAddress">Shipping address is the same as my billing address</label>
+            </div>
+
+            <div class="field inline">
+                <input type="checkbox" id="saveInfo" name="saveInfo">
+                <label for="saveInfo">Save this information for next time</label>
+            </div>
+        </fieldset>
+
+        <!-- ========== 4. 결제 ========== -->
+        <fieldset>
+            <legend>Payment (결제 수단)</legend>
+
+            <div class="field inline">
+                <input type="radio" id="credit" name="paymentMethod" value="credit" checked>
+                <label for="credit">Credit card</label>
+
+                <input type="radio" id="debit" name="paymentMethod" value="debit">
+                <label for="debit">Debit card</label>
+
+                <input type="radio" id="paypal" name="paymentMethod" value="paypal">
+                <label for="paypal">PayPal</label>
+            </div>
+
+            <div class="field">
+                <label for="ccName">Name on card</label>
+                <input type="text" id="ccName" name="ccName">
+                <small>Full name as displayed on card</small>
+            </div>
+
+            <div class="field">
+                <label for="ccNumber">Credit card number</label>
+                <input type="text" id="ccNumber" name="ccNumber" placeholder="1234-5678-1234-5678">
+            </div>
+
+            <div class="field">
+                <label for="ccExpiration">Expiration</label>
+                <input type="month" id="ccExpiration" name="ccExpiration">
+            </div>
+
+            <div class="field">
+                <label for="ccCvv">CVV</label>
+                <input type="text" id="ccCvv" name="ccCvv" pattern="[0-9]{3}">
+                <div class="error-text">CVV는 숫자 3자리입니다.</div>
+            </div>
+        </fieldset>
+
+        <!-- 체크박스에 required → 체크하지 않으면 invalid -->
+        <div class="field inline">
+            <input type="checkbox" id="agree" name="agree" required>
+            <label for="agree">이용 약관에 동의합니다. <span class="required-mark">*</span></label>
+            <div class="error-text">약관에 동의해야 합니다.</div>
+        </div>
+
+        <div class="buttons">
+            <button type="submit">Continue to checkout</button>
+            <button type="reset">다시 입력</button>
+        </div>
+    </form>
+
+    <!--
+        <script>를 body 맨 아래에 두는 이유:
+        HTML 요소(form, input)가 먼저 다 만들어진 뒤에 스크립트가 실행되어야
+        document.querySelector()로 요소를 찾을 수 있기 때문이다.
+    -->
+    <script>
+        // 1. form 요소 찾기
+        const form = document.querySelector("#userForm");
+
+        // 2. 검사할 입력 요소와, 틀렸을 때 보여줄 메시지를 순서대로 정리
+        //    (배열 순서 = 화면 위에서 아래 순서 → 가장 위에 있는 틀린 칸부터 알려준다)
+        const checks = [
+            { input: document.querySelector("#firstName"),    message: "이름을 입력하세요." },
+            { input: document.querySelector("#lastName"),     message: "성을 입력하세요." },
+            { input: document.querySelector("#username"),     message: "Username은 3자 이상 입력하세요." },
+            { input: document.querySelector("#email"),        message: "유효한 이메일을 입력하세요." },
+            { input: document.querySelector("#password"),     message: "비밀번호는 6자 이상 입력하세요." },
+            { input: document.querySelector("#address"),      message: "주소를 입력하세요." },
+            { input: document.querySelector("#country"),      message: "국가를 선택하세요." },
+            { input: document.querySelector("#zip"),          message: "우편번호는 숫자 5자리로 입력하세요." },
+            { input: document.querySelector("#deliveryDate"), message: "희망 배송일을 선택하세요." },
+            { input: document.querySelector("#ccCvv"),        message: "CVV는 숫자 3자리로 입력하세요." },
+            { input: document.querySelector("#agree"),        message: "이용 약관에 동의해 주세요." }
+        ];
+
+        // 3. submit 이벤트 처리 (addEventListener 사용)
+        form.addEventListener("submit", function (event) {
+
+            // 3-1. 기본 제출 동작 막기
+            //      막지 않으면 페이지가 새로고침(또는 action 주소로 이동)되어 버린다.
+            event.preventDefault();
+
+            // 3-2. 이제부터 빨간/초록 테두리와 에러 문구를 보여주도록 클래스 추가
+            form.classList.add("was-validated");
+
+            // 3-3. 입력 요소를 하나씩 검사
+            for (const item of checks) {
+
+                // checkValidity() : required, type, minlength, pattern 등
+                //                   HTML 속성 규칙을 모두 통과하면 true, 하나라도 틀리면 false
+                if (!item.input.checkValidity()) {
+                    alert(item.message);   // 무엇이 틀렸는지 알림
+                    item.input.focus();    // 틀린 칸으로 커서 이동
+                    return;                // 함수 종료 → 아래의 "등록 완료"까지 가지 않는다
+                }
+            }
+
+            // 3-4. 혹시 목록에서 빠진 칸이 있을 수 있으니 form 전체도 한 번 더 확인
+            if (!form.checkValidity()) {
+                const firstInvalid = form.querySelector(":invalid");
+                alert("입력값을 다시 확인하세요.");
+                firstInvalid.focus();
+                return;
+            }
+
+            // 3-5. 여기까지 왔다면 모든 조건 통과!
+            const name = document.querySelector("#lastName").value
+                       + document.querySelector("#firstName").value;
+            alert(name + "님, 등록이 완료되었습니다.");
+
+            // 3-6. 입력값 초기화 + 빨간/초록 표시 제거
+            form.reset();
+            form.classList.remove("was-validated");
+        });
+
+        // 4. "다시 입력" 버튼을 누르면 검사 표시도 함께 지우기
+        form.addEventListener("reset", function () {
+            form.classList.remove("was-validated");
+        });
+    </script>
+</body>
+</html>
